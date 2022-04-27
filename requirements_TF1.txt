@@ -1,4 +1,4 @@
 conda create -y -n TF1env python=3.7 
 conda activate TF1env
 # Python libraries:
-pip install tensorflow==1.15.5 keras==2.3.1 jupyter==1.0.0 numpy==1.16.5 h5py==2.10.0 ipyfilechooser==0.4.2
+pip install tensorflow==1.15.5 keras==2.3.1 jupyter==1.0.0 numpy==1.18.0 imageio==2.15.0 h5py==2.10.0 ipyfilechooser==0.4.2
