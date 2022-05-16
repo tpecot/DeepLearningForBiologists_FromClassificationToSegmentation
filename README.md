@@ -6,4 +6,4 @@ This is a 3-day workshop. Slides describing the background required to understan
 # Citation
 Please cite our papers if you use our codes: <br> 
 Thierry Pécot, Alexander Alekseyenko and Kristin Wallace (2022): [A deep learning segmentation strategy that minimizes the amount of manually annotated images ](https://f1000research.com/articles/10-256) <br>
-Thierry Pécot et al. (2022): [Deep learning tools and modeling to estimate the temporal expression of cell cycle proteins from 2D still images](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009949)
+Thierry Pécot, Maria C. Cuitiño, Roger H. Johnson, Cynthia Timmers, Gustavo Leone (2022): [Deep learning tools and modeling to estimate the temporal expression of cell cycle proteins from 2D still images](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1009949)
