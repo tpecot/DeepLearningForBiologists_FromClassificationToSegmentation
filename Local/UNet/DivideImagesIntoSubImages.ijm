@@ -34,12 +34,12 @@ function processFolder(input) {
 
 function processFile(input, output, file) {
 
-
+	// parameters
 	// number of sub-images across width
-	width_divide = 4;
+	width_divide = 2;
 	// number of sub-images across height
 	height_divide = 2;
-	///////////// define nuclei segmentation masks as ROIs /////////////////
+	
 	// open image
 	open(input + File.separator + file);
 	// rename image
