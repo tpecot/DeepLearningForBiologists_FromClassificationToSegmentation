@@ -3,6 +3,22 @@ Deep learning has demonstrated astonishing classification and segmentation resul
 
 This is a 3-day workshop. Slides describing the background required to understand the methods and links to video tutorials are available in Courses. All the codes and data used during the workshop are located in Codes and Data.
 
+# Video tutorials
+[Software installation](https://youtu.be/fXFyHpNOACE) <br>
+[Colab setup](https://youtu.be/uVLlPq-BUFc) <br>
+[Image classification - MNIST training](https://youtu.be/8GsW6-UquZg) <br>
+[Image classification - MNIST processing](https://youtu.be/OByTeEdcVJc) <br>
+[Image classification - MobileNetV2 training with ImageNet transfer learning](https://youtu.be/c-S7AtUTnFU) <br>
+[Image classification - MobileNetV2 processing](https://youtu.be/dKILZjulmQc) <br>
+[Tissue segmentation - Data preparation](https://youtu.be/eQSN7MtV96U) <br>
+[Tissue segmentation - UNet training](https://youtu.be/ZIgUMw7gAck) <br>
+[Tissue segmentation - UNet processing with a Jupyter notebook](https://youtu.be/0NOFSsSX2uU) <br>
+[Tissue segmentation - UNet processing with Fiji](https://youtu.be/vbjcZsjYnzw) <br>
+[Nuclei segmentation - UNet training](https://youtu.be/72BGxDHMhM8) <br>
+[Nuclei segmentation - UNet processing (Jupyter notebook and Fiji)](https://youtu.be/pptqdUi2a7I) <br>
+[Nuclei segmentation - Stardist training (with and without transfer learning)](https://youtu.be/xrQ33hWRAsY) <br>
+[Nuclei segmentation - Stardist processing (Jupyter notebook and Fiji)](https://youtu.be/wUnNWWLQIAY) <br>
+
 # Citation
 Please cite our papers if you use our codes: <br> 
 Thierry Pécot, Alexander Alekseyenko and Kristin Wallace (2022): [A deep learning segmentation strategy that minimizes the amount of manually annotated images ](https://f1000research.com/articles/10-256) <br>
