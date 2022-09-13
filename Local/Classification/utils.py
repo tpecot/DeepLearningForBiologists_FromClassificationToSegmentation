@@ -1030,7 +1030,7 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     
     os.makedirs(name=output_dir, exist_ok=True)
     file_name_save = os.path.join(output_dir, model_name + ".h5")
-    logdir = "logs/scalars/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    logdir = "logs/scalars/" + model_name + '_' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     print(logdir)
     tensorboard_callback = TensorBoard(log_dir=logdir)
     reduce_lr_on_plateau_callback = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=0.000001)
