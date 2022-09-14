@@ -284,7 +284,7 @@ def running_parameters_interface(nb_trainings):
 
         label_layout = Layout(width='150px',height='30px')
 
-        output_mode[i] = HBox([Label('Score:', layout=label_layout), widgets.Checkbox(
+        output_mode[i] = HBox([Label('Score image:', layout=label_layout), widgets.Checkbox(
             value=False, description='',disabled=False)])
         display(output_mode[i])
         
