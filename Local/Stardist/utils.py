@@ -937,7 +937,7 @@ def train_model_sample_Stardist_3D(dataset_training = None,  dataset_validation 
         n_channel_in     = n_channels,
         # adjust for your data below (make patch size as large as possible)
         train_patch_size = (imaging_size_z, imaging_size_y, imaging_size_x),
-        train_batch_size = 1,
+        train_batch_size = 2,
         train_epochs     = n_epoch,
         train_steps_per_epoch  = len(X_train)/batch_size,
         )
