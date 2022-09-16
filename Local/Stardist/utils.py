@@ -839,7 +839,7 @@ def train_model_sample_Stardist_2D(dataset_training = None,  dataset_validation 
             unet_kernel_size       = (3,3),
             # Number of convolution kernels (feature channels) for first U-Net layer
             # Doubled after each down-sampling layer
-            unet_n_filter_base     = 64,#32,
+            unet_n_filter_base     = 32,
             # Maxpooling size for all (U-Net) convolution layers
             unet_pool              = (2,2),
             # Number of filters of the extra convolution layer after U-Net (0 to disable)
