@@ -1,0 +1,15 @@
+From Anaconda Prompt run as admin:
+(base)
+> set http_proxy=http://cache.etu.univ-nantes.fr:3128
+> set https_proxy=http://cache.etu.univ-nantes.fr:3128
+
+> conda env create -f napari.yaml
+
+
+>  conda activate NapariEnvproxy
+
+From Anaconda Prompt as student:
+conda activate NapariEnvproxy
+
+and to be able to download the default models from stardist
+> set https_proxy=http://cache.etu.univ-nantes.fr:3128 
