@@ -1,0 +1,9 @@
+From Anaconda Promp run as admin:
+(base)
+> set http_proxy=http://cache.etu.univ-nantes.fr:3128
+> set https_proxy=http://cache.etu.univ-nantes.fr:3128
+
+> conda env create -f napari.yaml
+
+
+>  conda activate NapariEnvproxy
