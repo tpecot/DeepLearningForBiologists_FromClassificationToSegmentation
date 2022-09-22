@@ -1,4 +1,0 @@
-pip_interop_enabled: true
-proxy_servers:
-  http: http://cache.etu.univ-nantes.fr:3128
-  https: http://cache.etu.univ-nantes.fr:3128
