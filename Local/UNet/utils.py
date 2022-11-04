@@ -88,7 +88,7 @@ def training_parameters_interface(nb_trainings):
         label_layout = Layout(width='250px',height='30px')
 
         model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
-            options=['3', '4', '5'], value='3', description='', disabled=False)])
+            options=['3', '4', '5'], value='4', description='', disabled=False)])
         display(model_depth[i])
         
         nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
