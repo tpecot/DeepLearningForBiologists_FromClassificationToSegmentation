@@ -36,6 +36,8 @@ def saving_model_for_Fiji_plugin_interface(nb_trainings):
     input_classifier = np.zeros([nb_trainings], FileChooser)
     output_folder = np.zeros([nb_trainings], FileChooser)
     output_name = np.zeros([nb_trainings], FileChooser)
+    model_depth = np.zeros([nb_trainings], FileChooser)
+    nb_neurons_first_layer = np.zeros([nb_trainings], FileChooser)
     nb_channels = np.zeros([nb_trainings], HBox)
     nb_classes = np.zeros([nb_trainings], HBox)
     imaging_field_x = np.zeros([nb_trainings], HBox)
@@ -50,12 +52,20 @@ def saving_model_for_Fiji_plugin_interface(nb_trainings):
         output_folder[i] = FileChooser('./models')
         display(output_folder[i])
 
-        label_layout = Layout(width='200px',height='30px')
-        
+        label_layout = Layout(width='250px',height='30px')
+
         output_name[i] = HBox([Label('Output name:', layout=label_layout), widgets.Text(
             value='', description='',disabled=False)])
         display(output_name[i])
 
+        model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
+            options=['3', '4', '5', '6', '7'], value='4', description='', disabled=False)])
+        display(model_depth[i])
+        
+        nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
+            options=['32', '64', '128', '256'], value='64', description='', disabled=False)])
+        display(nb_neurons_first_layer[i])
+        
         nb_channels[i] = HBox([Label('Number of channels:', layout=label_layout), widgets.IntText(
             value=1, description='', disabled=False)])
         display(nb_channels[i])
@@ -76,6 +86,8 @@ def saving_model_for_Fiji_plugin_interface(nb_trainings):
     parameters.append(input_classifier)
     parameters.append(output_folder)
     parameters.append(output_name)
+    parameters.append(model_depth)
+    parameters.append(nb_neurons_first_layer)
     parameters.append(nb_channels)
     parameters.append(nb_classes)
     parameters.append(imaging_field_x)
@@ -92,11 +104,14 @@ def saving_model_for_Fiji_plugin(nb_runnings, parameters):
             sys.exit("Running #"+str(i+1)+": You need to select an output directory")
 
         model_path = parameters[0][i].selected
-        nb_classes = parameters[4][i].children[1].value
-        dim_x = parameters[5][i].children[1].value
-        dim_y = parameters[6][i].children[1].value
-        nb_channels = parameters[3][i].children[1].value
-        model = unet(nb_classes, dim_x, dim_y, nb_channels, model_path)
+        nb_classes = parameters[6][i].children[1].value
+        dim_x = parameters[7][i].children[1].value
+        dim_y = parameters[8][i].children[1].value
+        nb_channels = parameters[5][i].children[1].value
+        model_depth = parameters[3][i].children[1].value
+        nb_neurons_first_layer = parameters[4][i].children[1].value
+        
+        model = unet(nb_classes, dim_x, dim_y, nb_channels, int(model_depth), int(nb_neurons_first_layer), model_path)
         save_path = parameters[1][i].selected+parameters[2][i].children[1].value
 
         tmp_path = tempfile.TemporaryDirectory()
@@ -127,4 +142,3 @@ def saving_model_for_Fiji_plugin(nb_runnings, parameters):
         
         del model
         
-
