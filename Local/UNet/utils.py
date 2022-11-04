@@ -220,7 +220,7 @@ def running_parameters_interface(nb_trainings):
 Training and processing calling functions 
 """
 
-def training_UNet(nb_trainings, parameters):
+def training(nb_trainings, parameters):
     for i in range(nb_trainings):
         if parameters[0][i].selected==None:
             sys.exit("Training #"+str(i+1)+": You need to select an input directory for training")
@@ -236,7 +236,7 @@ def training_UNet(nb_trainings, parameters):
         train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[12][i].children[1].value, parameters[10][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[2][i].selected, parameters[9][i].children[1].value, parameters[11][i].children[1].value, parameters[13][i].children[1].value)
         del model
         
-def running_UNet(nb_runnings, parameters):
+def running(nb_runnings, parameters):
     for i in range(nb_runnings):
         if parameters[0][i].selected==None:
             sys.exit("Running #"+str(i+1)+": You need to select an input directory for images to be processed")
