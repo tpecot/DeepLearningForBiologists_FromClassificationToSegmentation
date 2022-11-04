@@ -974,7 +974,7 @@ def run_models_on_directory(data_location, output_location, model, score):
             output_image = np.zeros((processed_image.shape[2], processed_image.shape[0], processed_image.shape[1]), np.uint8)
             max_channels = np.argmax(processed_image, axis=2)
             for i in range(output_image.shape[0]):
-                output_image[i-1, : , :] = np.where(max_channels == i, 255, 0)
+                output_image[i, : , :] = np.where(max_channels == i, 255, 0)
             # Save images
             cnnout_name = os.path.join(output_location, os.path.splitext(img_list_files[0][counter])[0] + ".tif")
             tiff.imsave(cnnout_name, output_image)
