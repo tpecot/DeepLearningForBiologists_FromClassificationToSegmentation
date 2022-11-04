@@ -38,8 +38,10 @@ import random
 
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, ReduceLROnPlateau, EarlyStopping
-from tensorflow.keras.optimizers import RMSprop
-    
+from tensorflow.keras.optimizers import RMSprop, SGD
+from tensorflow.keras.layers import Input, Conv2D
+from tensorflow.keras.models import Model
+
 import datetime
 import math
 
@@ -48,7 +50,7 @@ import ipyfilechooser
 from ipyfilechooser import FileChooser
 from ipywidgets import HBox, Label, Layout
 
-from models import unet as unet
+from models import unet
 
 
 """
@@ -59,6 +61,8 @@ def training_parameters_interface(nb_trainings):
     training_dir = np.zeros([nb_trainings], FileChooser)
     validation_dir = np.zeros([nb_trainings], FileChooser)
     output_dir = np.zeros([nb_trainings], FileChooser)
+    model_depth = np.zeros([nb_trainings], FileChooser)
+    nb_neurons_first_layer = np.zeros([nb_trainings], FileChooser)
     nb_channels = np.zeros([nb_trainings], HBox)
     nb_classes = np.zeros([nb_trainings], HBox)
     imaging_field_x = np.zeros([nb_trainings], HBox)
@@ -81,8 +85,16 @@ def training_parameters_interface(nb_trainings):
         output_dir[i] = FileChooser('./models')
         display(output_dir[i])
 
-        label_layout = Layout(width='200px',height='30px')
+        label_layout = Layout(width='250px',height='30px')
 
+        model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
+            options=['3', '4', '5'], value='3', description='', disabled=False)])
+        display(model_depth[i])
+        
+        nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
+            options=['32', '64', '128'], value='64', description='', disabled=False)])
+        display(nb_neurons_first_layer[i])
+        
         nb_channels[i] = HBox([Label('Number of channels:', layout=label_layout), widgets.IntText(
             value=1, description='', disabled=False)])
         display(nb_channels[i])
@@ -123,6 +135,8 @@ def training_parameters_interface(nb_trainings):
     parameters.append(training_dir)
     parameters.append(validation_dir)
     parameters.append(output_dir)
+    parameters.append(model_depth)
+    parameters.append(nb_neurons_first_layer)
     parameters.append(nb_channels)
     parameters.append(nb_classes)
     parameters.append(imaging_field_x)
@@ -139,6 +153,8 @@ def running_parameters_interface(nb_trainings):
     input_dir = np.zeros([nb_trainings], FileChooser)
     input_classifier = np.zeros([nb_trainings], FileChooser)
     output_dir = np.zeros([nb_trainings], FileChooser)
+    model_depth = np.zeros([nb_trainings], FileChooser)
+    nb_neurons_first_layer = np.zeros([nb_trainings], FileChooser)
     output_mode = np.zeros([nb_trainings], HBox)
     nb_channels = np.zeros([nb_trainings], HBox)
     nb_classes = np.zeros([nb_trainings], HBox)
@@ -157,8 +173,16 @@ def running_parameters_interface(nb_trainings):
         output_dir[i] = FileChooser('./datasets')
         display(output_dir[i])
 
-        label_layout = Layout(width='150px',height='30px')
+        label_layout = Layout(width='250px',height='30px')
 
+        model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
+            options=['3', '4', '5'], value='3', description='', disabled=False)])
+        display(model_depth[i])
+        
+        nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
+            options=['32', '64', '128'], value='64', description='', disabled=False)])
+        display(nb_neurons_first_layer[i])
+        
         output_mode[i] = HBox([Label('Score:', layout=label_layout), widgets.Checkbox(
             value=False, description='',disabled=False)])
         display(output_mode[i])
@@ -182,6 +206,8 @@ def running_parameters_interface(nb_trainings):
     parameters.append(input_dir)
     parameters.append(input_classifier)
     parameters.append(output_dir)
+    parameters.append(model_depth)
+    parameters.append(nb_neurons_first_layer)
     parameters.append(output_mode)
     parameters.append(nb_channels)
     parameters.append(nb_classes)
@@ -194,7 +220,7 @@ def running_parameters_interface(nb_trainings):
 Training and processing calling functions 
 """
 
-def training(nb_trainings, parameters):
+def training_UNet(nb_trainings, parameters):
     for i in range(nb_trainings):
         if parameters[0][i].selected==None:
             sys.exit("Training #"+str(i+1)+": You need to select an input directory for training")
@@ -202,13 +228,15 @@ def training(nb_trainings, parameters):
             sys.exit("Training #"+str(i+1)+": You need to select an output directory for the trained model")
     
 
-        model = unet(parameters[4][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value)
-        model_name = "UNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"DA_"+str(parameters[8][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        model = unet(parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[5][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value))
+        model_name = "UNet_model_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_first_layer_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[10][i].children[1].value, parameters[8][i].children[1].value, parameters[3][i].children[1].value, parameters[4][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[2][i].selected, parameters[7][i].children[1].value, parameters[9][i].children[1].value, parameters[11][i].children[1].value)
+        model_name = "UNet_model_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_first_layer_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[12][i].children[1].value, parameters[10][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[2][i].selected, parameters[9][i].children[1].value, parameters[11][i].children[1].value, parameters[13][i].children[1].value)
         del model
         
-def running(nb_runnings, parameters):
+def running_UNet(nb_runnings, parameters):
     for i in range(nb_runnings):
         if parameters[0][i].selected==None:
             sys.exit("Running #"+str(i+1)+": You need to select an input directory for images to be processed")
@@ -217,10 +245,12 @@ def running(nb_runnings, parameters):
         if parameters[2][i].selected==None:
             sys.exit("Running #"+str(i+1)+": You need to select an output directory for processed images")
 
-        model = unet(parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[4][i].children[1].value, parameters[1][i].selected)
-        run_models_on_directory(parameters[0][i].selected, parameters[2][i].selected, model, parameters[3][i].children[1].value)
+        model = unet(parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[9][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value), parameters[1][i].selected)
+        
+        run_models_on_directory(parameters[0][i].selected, parameters[2][i].selected, model, parameters[5][i].children[1].value)
+        
         del model
-    
+        
         
 """
 Useful functions 
@@ -318,9 +348,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             else:
                 sys.exit("The image " + imageFile + " does not have a corresponding mask file ending with png, tif or tiff")
             current_mask_image = get_image(maskPath)
-            if current_mask_image.shape[0]<imaging_field_x:
+            if current_mask_image.shape[1]<imaging_field_x:
                 sys.exit("The mask " + baseName + " has a smaller x dimension than the imaging field")
-            if current_mask_image.shape[1]<imaging_field_y:
+            if current_mask_image.shape[0]<imaging_field_y:
                 sys.exit("The mask " + baseName + " has a smaller y dimension than the imaging field")
                 
             min_dimension = current_mask_image.shape[2]
@@ -349,9 +379,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             imagePath = os.path.join(imglist_validation_directory, imageFile)
             
             current_image = get_image(imagePath)
-            if current_image.shape[0]<imaging_field_x:
+            if current_image.shape[1]<imaging_field_x:
                 sys.exit("The image " + baseName + " has a smaller x dimension than the imaging field")
-            if current_image.shape[1]<imaging_field_y:
+            if current_image.shape[0]<imaging_field_y:
                 sys.exit("The image " + baseName + " has a smaller y dimension than the imaging field")
             if current_image.shape[2]!=nb_channels:
                 sys.exit("The image " + baseName + " has a different number of channels than indicated in the U-Net architecture")
@@ -373,9 +403,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
                 sys.exit("The image " + imageFile + " does not have a corresponding mask file ending with png, tif or tiff")
             
             current_mask_image = get_image(maskPath)
-            if current_mask_image.shape[0]<imaging_field_x:
+            if current_mask_image.shape[1]<imaging_field_x:
                 sys.exit("The mask " + baseName + " has a smaller x dimension than the imaging field")
-            if current_mask_image.shape[1]<imaging_field_y:
+            if current_mask_image.shape[0]<imaging_field_y:
                 sys.exit("The mask " + baseName + " has a smaller y dimension than the imaging field")
             
             min_dimension = current_mask_image.shape[2]
@@ -403,9 +433,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             
             imagePath = os.path.join(imglist_training_directory, imageFile)
             current_image = get_image(imagePath)
-            if current_image.shape[0]<imaging_field_x:
+            if current_image.shape[1]<imaging_field_x:
                 sys.exit("The image " + baseName + " has a smaller x dimension than the imaging field")
-            if current_image.shape[1]<imaging_field_y:
+            if current_image.shape[0]<imaging_field_y:
                 sys.exit("The image " + baseName + " has a smaller y dimension than the imaging field")
             if current_image.shape[2]!=nb_channels:
                 sys.exit("The image " + baseName + " has a different number of channels than indicated in the U-Net architecture")
@@ -418,9 +448,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             baseName = os.path.splitext(os.path.basename(imageFile))[0]
             imagePath = os.path.join(imglist_training_directory, imageFile)
             current_image = get_image(imagePath)
-            if current_image.shape[0]<imaging_field_x:
+            if current_image.shape[1]<imaging_field_x:
                 sys.exit("The image " + baseName + " has a smaller x dimension than the imaging field")
-            if current_image.shape[1]<imaging_field_y:
+            if current_image.shape[2]<imaging_field_y:
                 sys.exit("The image " + baseName + " has a smaller y dimension than the imaging field")
             if current_image.shape[2]!=nb_channels:
                 sys.exit("The image " + baseName + " has a different number of channels than indicated in the U-Net architecture")
@@ -434,9 +464,9 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             else:
                 sys.exit("The image " + imageFile + " does not have a corresponding mask file ending with png, tif or tiff")
             current_mask_image = get_image(maskPath)
-            if current_mask_image.shape[0]<imaging_field_x:
+            if current_mask_image.shape[1]<imaging_field_x:
                 sys.exit("The mask " + baseName + " has a smaller x dimension than the imaging field")
-            if current_mask_image.shape[1]<imaging_field_y:
+            if current_mask_image.shape[0]<imaging_field_y:
                 sys.exit("The mask " + baseName + " has a smaller y dimension than the imaging field")
 
             min_dimension = current_mask_image.shape[2]
@@ -538,35 +568,58 @@ def random_sample_generator(x_init, y_init, batch_size, n_channels, n_classes, d
 
         
 def GenerateRandomImgaugAugmentation(
-        pAugmentationLevel=5,           # number of augmentations
+        pNbAugmentations=5,           # number of augmentations
+        pEnableResizing=False,          # enable scaling
+        pScaleFactor=0.5,              # maximum scale factor
+        pEnableCropping=True,           # enable cropping
+        pCropFactor=0.25,               # maximum crop out size (minimum new size is 1.0-pCropFactor)
         pEnableFlipping1=True,          # enable x flipping
         pEnableFlipping2=True,          # enable y flipping
         pEnableRotation90=True,           # enable rotation
-        pEnableRotation=False,           # enable rotation
-        pMaxRotationDegree=15,             # maximum rotation degree
-        pEnableShearX=False,             # enable x shear
-        pEnableShearY=False,             # enable y shear
+        pEnableRotation=True,           # enable rotation
+        pMaxRotationDegree=15,             # maximum shear degree
+        pEnableShearX=True,             # enable x shear
+        pEnableShearY=True,             # enable y shear
         pMaxShearDegree=15,             # maximum shear degree
+        pEnableDropOut=True,            # enable pixel dropout
+        pMaxDropoutPercentage=.1,     # maximum dropout percentage
         pEnableBlur=True,               # enable gaussian blur
-        pBlurSigma=.5,                  # maximum sigma for gaussian blur
-        pEnableDropOut=True,
-        pMaxDropoutPercentage=0.01,
-        pEnableSharpness=False,          # enable sharpness
-        pSharpnessFactor=0.0001,           # maximum additional sharpness
-        pEnableEmboss=False,             # enable emboss
-        pEmbossFactor=0.0001,              # maximum emboss
-        pEnableBrightness=False,         # enable brightness
-        pBrightnessFactor=0.000001,         # maximum +- brightness
+        pBlurSigma=.25,                  # maximum sigma for gaussian blur
+        pEnableSharpness=True,          # enable sharpness
+        pSharpnessFactor=.1,           # maximum additional sharpness
+        pEnableEmboss=True,             # enable emboss
+        pEmbossFactor=.1,              # maximum emboss
+        pEnableBrightness=True,         # enable brightness
+        pBrightnessFactor=.1,         # maximum +- brightness
         pEnableRandomNoise=True,        # enable random noise
-        pMaxRandomNoise=0.01,           # maximum random noise strength
+        pMaxRandomNoise=.1,           # maximum random noise strength
         pEnableInvert=False,             # enables color invert
         pEnableContrast=True,           # enable contrast change
-        pContrastFactor=0.01,            # maximum +- contrast
+        pContrastFactor=.1,            # maximum +- contrast
 ):
     
     augmentationMap = []
     augmentationMapOutput = []
 
+    if pEnableResizing:
+        if random.Random().randint(0, 1)==1:
+            randomResizeX = 1 - random.Random().random()*pScaleFactor
+        else:
+            randomResizeX = 1 + random.Random().random()*pScaleFactor
+        if random.Random().randint(0, 1)==1:
+            randomResizeY = 1 - random.Random().random()*pScaleFactor
+        else:
+            randomResizeY = 1 + random.Random().random()*pScaleFactor
+        aug = iaa.Resize({"height": randomResizeY, "width": randomResizeX})
+        augmentationMap.append(aug)
+            
+    if pEnableCropping:
+        randomCrop2 = random.Random().random()*pCropFactor
+        randomCrop4 = random.Random().random()*pCropFactor
+        randomCrop1 = random.Random().random()*pCropFactor
+        randomCrop3 = random.Random().random()*pCropFactor
+        aug = iaa.Crop(percent = (randomCrop1,randomCrop2,randomCrop3,randomCrop4))
+        augmentationMap.append(aug)
 
     if pEnableFlipping1:
         aug = iaa.Fliplr()
@@ -604,7 +657,7 @@ def GenerateRandomImgaugAugmentation(
             randomShearingY = -random.Random().random()*pMaxShearDegree
         aug = iaa.ShearY(randomShearingY)
         augmentationMap.append(aug)
-
+        
     if pEnableDropOut:
         randomDropOut = random.Random().random()*pMaxDropoutPercentage
         aug = iaa.Dropout(p=randomDropOut, per_channel=False)
@@ -653,14 +706,15 @@ def GenerateRandomImgaugAugmentation(
         aug = iaa.contrast.LinearContrast(randomContrast)
         augmentationMap.append(aug)
 
-    arr = np.arange(len(augmentationMap))
-    np.random.shuffle(arr)
-    for i in range(pAugmentationLevel):
-        augmentationMapOutput.append(augmentationMap[arr[i]])
-    
         
-    return iaa.Sequential(augmentationMapOutput)
+    widthFactor = 1
+    heightFactor = 1
 
+    arr = np.arange(0,len(augmentationMap))
+    np.random.shuffle(arr)
+    
+    
+    return iaa.Sequential(augmentationMapOutput)
 
 def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2, nb_augmentations):
 
@@ -786,6 +840,7 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
 
     # prepare the model compilation
     optimizer = RMSprop(learning_rate=learning_rate)
+    #optimizer = SGD(learning_rate=learning_rate)
     model.compile(loss = weighted_crossentropy(class_weights = class_weights), optimizer = optimizer, metrics=['accuracy'])
 
     # prepare the generation of data
@@ -794,11 +849,16 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     else:
         train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y, nb_augmentations) 
         
+    validation_generator = random_sample_generator(X_test, Y_test, batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y) 
     # fit the model
     lr_sched = rate_scheduler(lr = learning_rate, decay = 0.95)
+    #loss_history = model.fit(train_generator,
+    #                                   steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
+    #                                   epochs=n_epoch, validation_data=(X_test,Y_test), 
+    #                                   callbacks = [ModelCheckpoint(file_name_save, monitor = 'val_loss', verbose = 0, save_best_only = True, mode = 'auto',save_weights_only = True), reduce_lr_on_plateau_callback, tensorboard_callback])
     loss_history = model.fit(train_generator,
                                        steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
-                                       epochs=n_epoch, validation_data=(X_test,Y_test), 
+                                       epochs=n_epoch, validation_data=validation_generator, validation_steps=len(X_test),
                                        callbacks = [ModelCheckpoint(file_name_save, monitor = 'val_loss', verbose = 0, save_best_only = True, mode = 'auto',save_weights_only = True), reduce_lr_on_plateau_callback, tensorboard_callback])
     
 """
@@ -815,15 +875,15 @@ def get_image_sizes(data_location):
     if len(img_temp.shape)>2:
         if img_temp.shape[0]<img_temp.shape[2]:
             nb_channels = img_temp.shape[0]
-            width = img_temp.shape[1]
-            height=img_temp.shape[2]
+            width = img_temp.shape[2]
+            height=img_temp.shape[1]
         else:
             nb_channels = img_temp.shape[2]
-            width = img_temp.shape[0]
-            height=img_temp.shape[1]
+            width = img_temp.shape[1]
+            height=img_temp.shape[0]
     else:
-        width = img_temp.shape[0]
-        height=img_temp.shape[1]
+        width = img_temp.shape[1]
+        height=img_temp.shape[0]
     return width, height, nb_channels
 
 def get_images_from_directory(data_location):
@@ -916,7 +976,7 @@ def run_models_on_directory(data_location, output_location, model, score):
             for i in range(output_image.shape[0]):
                 output_image[i-1, : , :] = np.where(max_channels == i, 255, 0)
             # Save images
-            cnnout_name = os.path.join(output_location, os.path.splitext(img_list_files[0][counter])[0] + ".tiff")
+            cnnout_name = os.path.join(output_location, os.path.splitext(img_list_files[0][counter])[0] + ".tif")
             tiff.imsave(cnnout_name, output_image)
         else:
             # Save images
@@ -924,7 +984,7 @@ def run_models_on_directory(data_location, output_location, model, score):
             for i in range(processed_image.shape[2]):
                 output_image[i, : , :] = processed_image[: , :, i]
             # Save images
-            cnnout_name = os.path.join(output_location, os.path.splitext(img_list_files[0][counter])[0] + ".tiff")
+            cnnout_name = os.path.join(output_location, os.path.splitext(img_list_files[0][counter])[0] + ".tif")
             tiff.imsave(cnnout_name, output_image)
 
 
