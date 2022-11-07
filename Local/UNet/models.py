@@ -37,7 +37,7 @@ def conv2d_bn(x, filters, num_row, num_col, border_mode='same', strides=(1, 1), 
 
 def get_core(dim1, dim2, nb_neurons_first_layer, n_channels):
     
-    x = Input(shape=(dim1, dim2, n_channels))
+    x = Input(shape=(dim2, dim1, n_channels))
 
     channel_axis = 3
     format = 'channels_last'
@@ -77,7 +77,7 @@ def get_core(dim1, dim2, nb_neurons_first_layer, n_channels):
 
 def get_core2(dim1, dim2, nb_neurons_first_layer, n_channels):
     
-    x = Input(shape=(dim1, dim2, n_channels))
+    x = Input(shape=(dim2, dim1, n_channels))
 
     channel_axis = 3
     format = 'channels_last'

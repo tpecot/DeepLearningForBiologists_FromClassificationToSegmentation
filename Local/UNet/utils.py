@@ -88,7 +88,7 @@ def training_parameters_interface(nb_trainings):
         label_layout = Layout(width='250px',height='30px')
 
         model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
-            options=['3', '4', '5'], value='4', description='', disabled=False)])
+            options=['3', '4', '5'], value='3', description='', disabled=False)])
         display(model_depth[i])
         
         nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
@@ -176,7 +176,7 @@ def running_parameters_interface(nb_trainings):
         label_layout = Layout(width='250px',height='30px')
 
         model_depth[i] = HBox([Label('Model depth:', layout=label_layout), widgets.Dropdown(
-            options=['3', '4', '5'], value='3', description='', disabled=False)])
+            options=['3', '4', '5', '6'], value='3', description='', disabled=False)])
         display(model_depth[i])
         
         nb_neurons_first_layer[i] = HBox([Label('Number of neurons in the first layer:', layout=label_layout), widgets.Dropdown(
@@ -220,7 +220,7 @@ def running_parameters_interface(nb_trainings):
 Training and processing calling functions 
 """
 
-def training(nb_trainings, parameters):
+def training_UNet(nb_trainings, parameters):
     for i in range(nb_trainings):
         if parameters[0][i].selected==None:
             sys.exit("Training #"+str(i+1)+": You need to select an input directory for training")
@@ -228,15 +228,15 @@ def training(nb_trainings, parameters):
             sys.exit("Training #"+str(i+1)+": You need to select an output directory for the trained model")
     
 
-        model = unet(parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[5][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value))
+        model = unet(parameters[6][i].children[1].value, parameters[8][i].children[1].value, parameters[7][i].children[1].value, parameters[5][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value))
         model_name = "UNet_model_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_first_layer_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         model_name = "UNet_model_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_first_layer_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[12][i].children[1].value, parameters[10][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[2][i].selected, parameters[9][i].children[1].value, parameters[11][i].children[1].value, parameters[13][i].children[1].value)
+        train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[12][i].children[1].value, parameters[10][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[8][i].children[1].value, parameters[7][i].children[1].value, parameters[2][i].selected, parameters[9][i].children[1].value, parameters[11][i].children[1].value, parameters[13][i].children[1].value)
         del model
         
-def running(nb_runnings, parameters):
+def running_UNet(nb_runnings, parameters):
     for i in range(nb_runnings):
         if parameters[0][i].selected==None:
             sys.exit("Running #"+str(i+1)+": You need to select an input directory for images to be processed")
@@ -245,7 +245,7 @@ def running(nb_runnings, parameters):
         if parameters[2][i].selected==None:
             sys.exit("Running #"+str(i+1)+": You need to select an output directory for processed images")
 
-        model = unet(parameters[7][i].children[1].value, parameters[8][i].children[1].value, parameters[9][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value), parameters[1][i].selected)
+        model = unet(parameters[7][i].children[1].value, parameters[9][i].children[1].value, parameters[8][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value), parameters[1][i].selected)
         
         run_models_on_directory(parameters[0][i].selected, parameters[2][i].selected, model, parameters[5][i].children[1].value)
         
@@ -450,7 +450,7 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
             current_image = get_image(imagePath)
             if current_image.shape[1]<imaging_field_x:
                 sys.exit("The image " + baseName + " has a smaller x dimension than the imaging field")
-            if current_image.shape[2]<imaging_field_y:
+            if current_image.shape[0]<imaging_field_y:
                 sys.exit("The image " + baseName + " has a smaller y dimension than the imaging field")
             if current_image.shape[2]!=nb_channels:
                 sys.exit("The image " + baseName + " has a different number of channels than indicated in the U-Net architecture")
@@ -511,8 +511,8 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
     X_test = channels_validation
     Y_test =[]
     for k in range(len(X_test)):
-        X_test[k] = X_test[k][0:imaging_field_x, 0:imaging_field_y, :]
-        Y_test.append(labels_validation[k][0:imaging_field_x, 0:imaging_field_y, :])
+        X_test[k] = X_test[k][0:imaging_field_y, 0:imaging_field_x, :]
+        Y_test.append(labels_validation[k][0:imaging_field_y, 0:imaging_field_x, :])
         
     train_dict = {"channels": channels_training, "labels": labels_training}
 
@@ -568,58 +568,35 @@ def random_sample_generator(x_init, y_init, batch_size, n_channels, n_classes, d
 
         
 def GenerateRandomImgaugAugmentation(
-        pNbAugmentations=5,           # number of augmentations
-        pEnableResizing=False,          # enable scaling
-        pScaleFactor=0.5,              # maximum scale factor
-        pEnableCropping=True,           # enable cropping
-        pCropFactor=0.25,               # maximum crop out size (minimum new size is 1.0-pCropFactor)
+        pAugmentationLevel=5,           # number of augmentations
         pEnableFlipping1=True,          # enable x flipping
         pEnableFlipping2=True,          # enable y flipping
         pEnableRotation90=True,           # enable rotation
-        pEnableRotation=True,           # enable rotation
-        pMaxRotationDegree=15,             # maximum shear degree
-        pEnableShearX=True,             # enable x shear
-        pEnableShearY=True,             # enable y shear
+        pEnableRotation=False,           # enable rotation
+        pMaxRotationDegree=15,             # maximum rotation degree
+        pEnableShearX=False,             # enable x shear
+        pEnableShearY=False,             # enable y shear
         pMaxShearDegree=15,             # maximum shear degree
-        pEnableDropOut=True,            # enable pixel dropout
-        pMaxDropoutPercentage=.1,     # maximum dropout percentage
         pEnableBlur=True,               # enable gaussian blur
-        pBlurSigma=.25,                  # maximum sigma for gaussian blur
-        pEnableSharpness=True,          # enable sharpness
-        pSharpnessFactor=.1,           # maximum additional sharpness
-        pEnableEmboss=True,             # enable emboss
-        pEmbossFactor=.1,              # maximum emboss
-        pEnableBrightness=True,         # enable brightness
-        pBrightnessFactor=.1,         # maximum +- brightness
+        pBlurSigma=.5,                  # maximum sigma for gaussian blur
+        pEnableDropOut=True,
+        pMaxDropoutPercentage=0.01,
+        pEnableSharpness=False,          # enable sharpness
+        pSharpnessFactor=0.0001,           # maximum additional sharpness
+        pEnableEmboss=False,             # enable emboss
+        pEmbossFactor=0.0001,              # maximum emboss
+        pEnableBrightness=False,         # enable brightness
+        pBrightnessFactor=0.000001,         # maximum +- brightness
         pEnableRandomNoise=True,        # enable random noise
-        pMaxRandomNoise=.1,           # maximum random noise strength
+        pMaxRandomNoise=0.01,           # maximum random noise strength
         pEnableInvert=False,             # enables color invert
         pEnableContrast=True,           # enable contrast change
-        pContrastFactor=.1,            # maximum +- contrast
+        pContrastFactor=0.01,            # maximum +- contrast
 ):
     
     augmentationMap = []
     augmentationMapOutput = []
 
-    if pEnableResizing:
-        if random.Random().randint(0, 1)==1:
-            randomResizeX = 1 - random.Random().random()*pScaleFactor
-        else:
-            randomResizeX = 1 + random.Random().random()*pScaleFactor
-        if random.Random().randint(0, 1)==1:
-            randomResizeY = 1 - random.Random().random()*pScaleFactor
-        else:
-            randomResizeY = 1 + random.Random().random()*pScaleFactor
-        aug = iaa.Resize({"height": randomResizeY, "width": randomResizeX})
-        augmentationMap.append(aug)
-            
-    if pEnableCropping:
-        randomCrop2 = random.Random().random()*pCropFactor
-        randomCrop4 = random.Random().random()*pCropFactor
-        randomCrop1 = random.Random().random()*pCropFactor
-        randomCrop3 = random.Random().random()*pCropFactor
-        aug = iaa.Crop(percent = (randomCrop1,randomCrop2,randomCrop3,randomCrop4))
-        augmentationMap.append(aug)
 
     if pEnableFlipping1:
         aug = iaa.Fliplr()
@@ -657,7 +634,7 @@ def GenerateRandomImgaugAugmentation(
             randomShearingY = -random.Random().random()*pMaxShearDegree
         aug = iaa.ShearY(randomShearingY)
         augmentationMap.append(aug)
-        
+
     if pEnableDropOut:
         randomDropOut = random.Random().random()*pMaxDropoutPercentage
         aug = iaa.Dropout(p=randomDropOut, per_channel=False)
@@ -706,15 +683,14 @@ def GenerateRandomImgaugAugmentation(
         aug = iaa.contrast.LinearContrast(randomContrast)
         augmentationMap.append(aug)
 
-        
-    widthFactor = 1
-    heightFactor = 1
-
-    arr = np.arange(0,len(augmentationMap))
+    arr = np.arange(len(augmentationMap))
     np.random.shuffle(arr)
+    for i in range(pAugmentationLevel):
+        augmentationMapOutput.append(augmentationMap[arr[i]])
     
-    
+        
     return iaa.Sequential(augmentationMapOutput)
+
 
 def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2, nb_augmentations):
 
@@ -845,17 +821,13 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
 
     # prepare the generation of data
     if nb_augmentations == 0:
-        train_generator = random_sample_generator(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y) 
+        train_generator = random_sample_generator(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x) 
     else:
-        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y, nb_augmentations) 
+        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x, nb_augmentations) 
         
-    validation_generator = random_sample_generator(X_test, Y_test, batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y) 
+    validation_generator = random_sample_generator(X_test, Y_test, batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x) 
     # fit the model
     lr_sched = rate_scheduler(lr = learning_rate, decay = 0.95)
-    #loss_history = model.fit(train_generator,
-    #                                   steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
-    #                                   epochs=n_epoch, validation_data=(X_test,Y_test), 
-    #                                   callbacks = [ModelCheckpoint(file_name_save, monitor = 'val_loss', verbose = 0, save_best_only = True, mode = 'auto',save_weights_only = True), reduce_lr_on_plateau_callback, tensorboard_callback])
     loss_history = model.fit(train_generator,
                                        steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
                                        epochs=n_epoch, validation_data=validation_generator, validation_steps=len(X_test),
@@ -905,17 +877,17 @@ def run_model(img, model, imaging_field_x = 256, imaging_field_y = 256):
     img = np.pad(img, pad_width = [(0,0), (5,5), (5,5), (0,0)], mode = 'reflect')
             
     n_classes = model.layers[-1].output_shape[-1]
-    image_size_x = img.shape[1]
-    image_size_y = img.shape[2]
-    model_output = np.zeros((image_size_x-10,image_size_y-10,n_classes))
-    current_output = np.zeros((1,imaging_field_x,imaging_field_y,n_classes))
+    image_size_x = img.shape[2]
+    image_size_y = img.shape[1]
+    model_output = np.zeros((image_size_y-10,image_size_x-10,n_classes))
+    current_output = np.zeros((1,imaging_field_y,imaging_field_x,n_classes))
     
     x_iterator = 0
     y_iterator = 0
     
     while x_iterator<=(image_size_x-imaging_field_x) and y_iterator<=(image_size_y-imaging_field_y):
-        current_output = model.predict(img[:,x_iterator:(x_iterator+imaging_field_x),y_iterator:(y_iterator+imaging_field_y),:])
-        model_output[x_iterator:(x_iterator+imaging_field_x-10),y_iterator:(y_iterator+imaging_field_y-10),:] = current_output[:,5:(imaging_field_x-5),5:(imaging_field_y-5),:]
+        current_output = model.predict(img[:,y_iterator:(y_iterator+imaging_field_y),x_iterator:(x_iterator+imaging_field_x),:])
+        model_output[y_iterator:(y_iterator+imaging_field_y-10),x_iterator:(x_iterator+imaging_field_x-10),:] = current_output[:,5:(imaging_field_y-5),5:(imaging_field_x-5),:]
         
         if x_iterator<(image_size_x-2*imaging_field_x):
             x_iterator += (imaging_field_x-10)
@@ -944,8 +916,8 @@ def run_models_on_directory(data_location, output_location, model, score):
     # determine the number of channels and classes as well as the imaging field dimensions
     input_shape = model.layers[0].output_shape
     n_channels = input_shape[0][-1]
-    imaging_field_x = input_shape[0][1]
-    imaging_field_y = input_shape[0][2]
+    imaging_field_x = input_shape[0][2]
+    imaging_field_y = input_shape[0][1]
     output_shape = model.layers[-1].output_shape
     n_classes = output_shape[-1]
     
