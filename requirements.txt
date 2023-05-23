@@ -1,6 +1,6 @@
 conda create -y -n DLenv python=3.9 
 conda activate DLenv
 # Python libraries:
-pip install pyparsing==2.2.1 tensorflow-gpu==2.7.0 scikit-image==0.18.3 scikit-learn==1.0.1 scipy==1.7.3 imgaug==0.4.0 Ipython==7.30.1 keras==2.7.0 opencv-python==4.4.0.46 jupyter==1.0.0 numpy==1.20.3 h5py==3.6.0 ipyfilechooser==0.4.2 stardist==0.7.3 
+pip install pyparsing==2.2.1 tensorflow-gpu==2.7.0 scikit-image==0.18.3 scikit-learn==1.0.1 scipy==1.7.3 imgaug==0.4.0 Ipython==7.30.1 keras==2.7.0 opencv-python==4.4.0.46 jupyter==1.0.0 numpy==1.20.3 h5py==3.6.0 ipyfilechooser==0.4.2 protobuf==3.20 stardist==0.7.3 
 conda install cudatoolkit
 conda install cudnn
