@@ -65,6 +65,8 @@ def training_parameters_stardist_interface_2D(nb_trainings):
     output_dir = np.zeros([nb_trainings], FileChooser)
     transfer_learning = np.zeros([nb_trainings], HBox)
     nb_channels = np.zeros([nb_trainings], HBox)
+    imaging_field_x = np.zeros([nb_trainings], HBox)
+    imaging_field_y = np.zeros([nb_trainings], HBox)
     learning_rate = np.zeros([nb_trainings], HBox)
     nb_epochs = np.zeros([nb_trainings], HBox)
     data_augmentation = np.zeros([nb_trainings], HBox)
@@ -93,6 +95,14 @@ def training_parameters_stardist_interface_2D(nb_trainings):
             value=1, description='', disabled=False)])
         display(nb_channels[i])
 
+        imaging_field_x[i] = HBox([Label('Imaging field in x:', layout=label_layout), widgets.IntText(
+            value=256, description='', disabled=False)])
+        display(imaging_field_x[i])
+
+        imaging_field_y[i] = HBox([Label('Imaging field in y:', layout=label_layout), widgets.IntText(
+            value=256, description='', disabled=False)])
+        display(imaging_field_y[i])
+
         learning_rate[i] = HBox([Label('Learning rate:', layout=label_layout), widgets.FloatText(
             value=1e-4, description='', disabled=False)])
         display(learning_rate[i])
@@ -119,6 +129,8 @@ def training_parameters_stardist_interface_2D(nb_trainings):
     parameters.append(output_dir)
     parameters.append(transfer_learning)
     parameters.append(nb_channels)
+    parameters.append(imaging_field_x)
+    parameters.append(imaging_field_y)
     parameters.append(learning_rate)
     parameters.append(nb_epochs)
     parameters.append(data_augmentation)
@@ -133,6 +145,10 @@ def training_parameters_stardist_interface_3D(nb_trainings):
     output_dir = np.zeros([nb_trainings], FileChooser)
     transfer_learning = np.zeros([nb_trainings], HBox)
     nb_channels = np.zeros([nb_trainings], HBox)
+    imaging_field_x = np.zeros([nb_trainings], HBox)
+    imaging_field_y = np.zeros([nb_trainings], HBox)
+    imaging_field_z = np.zeros([nb_trainings], HBox)
+    anisotropy_ratio_z_over_xy = np.zeros([nb_trainings], HBox)
     learning_rate = np.zeros([nb_trainings], HBox)
     nb_epochs = np.zeros([nb_trainings], HBox)
     data_augmentation = np.zeros([nb_trainings], HBox)
@@ -151,7 +167,7 @@ def training_parameters_stardist_interface_3D(nb_trainings):
         output_dir[i] = FileChooser('./models')
         display(output_dir[i])
 
-        label_layout = Layout(width='180px',height='30px')
+        label_layout = Layout(width='220px',height='30px')
 
         transfer_learning[i] = HBox([Label('Transfer learning (3D demo):', layout=label_layout), widgets.Checkbox(
             value=True, description='', disabled=False)])
@@ -161,6 +177,22 @@ def training_parameters_stardist_interface_3D(nb_trainings):
             value=1, description='', disabled=False)])
         display(nb_channels[i])
 
+        imaging_field_x[i] = HBox([Label('Imaging field in x:', layout=label_layout), widgets.IntText(
+            value=128, description='', disabled=False)])
+        display(imaging_field_x[i])
+
+        imaging_field_y[i] = HBox([Label('Imaging field in y:', layout=label_layout), widgets.IntText(
+            value=128, description='', disabled=False)])
+        display(imaging_field_y[i])
+
+        imaging_field_z[i] = HBox([Label('Imaging field in z:', layout=label_layout), widgets.IntText(
+            value=32, description='', disabled=False)])
+        display(imaging_field_z[i])
+
+        anisotropy_ratio_z_over_xy[i] = HBox([Label('Anisotropy ratio between z and x-y:', layout=label_layout), widgets.FloatText(
+            value=2.0, description='', disabled=False)])
+        display(anisotropy_ratio_z_over_xy[i])
+        
         learning_rate[i] = HBox([Label('Learning rate:', layout=label_layout), widgets.FloatText(
             value=1e-4, description='', disabled=False)])
         display(learning_rate[i])
@@ -187,6 +219,10 @@ def training_parameters_stardist_interface_3D(nb_trainings):
     parameters.append(output_dir)
     parameters.append(transfer_learning)
     parameters.append(nb_channels)
+    parameters.append(imaging_field_x)
+    parameters.append(imaging_field_y)
+    parameters.append(imaging_field_z)
+    parameters.append(anisotropy_ratio_z_over_xy)
     parameters.append(learning_rate)
     parameters.append(nb_epochs)
     parameters.append(data_augmentation)
@@ -194,7 +230,6 @@ def training_parameters_stardist_interface_3D(nb_trainings):
     parameters.append(train_to_val_ratio)
     
     return parameters  
-
 
 def running_parameters_stardist_interface_2D(nb_trainings):
     input_dir = np.zeros([nb_trainings], FileChooser)
@@ -236,9 +271,8 @@ def running_parameters_stardist_interface_3D(nb_trainings):
     input_dir = np.zeros([nb_trainings], FileChooser)
     input_classifier = np.zeros([nb_trainings], FileChooser)
     output_dir = np.zeros([nb_trainings], FileChooser)
-    voxel_width = np.zeros([nb_trainings], HBox)
-    voxel_height = np.zeros([nb_trainings], HBox)
     prob_th = np.zeros([nb_trainings], HBox)
+    scale_factor = np.zeros([nb_trainings], HBox)
     
     parameters = []
     for i in range(nb_trainings):
@@ -254,37 +288,21 @@ def running_parameters_stardist_interface_3D(nb_trainings):
 
         label_layout = Layout(width='220px',height='30px')
 
-        voxel_width[i] = HBox([Label('Voxel width (µm):', layout=label_layout), widgets.FloatText(
-            value=0.1, description='', disabled=False)])
-        display(voxel_width[i])
-        voxel_height[i] = HBox([Label('Voxel width (µm):', layout=label_layout), widgets.FloatText(
-            value=0.3, description='', disabled=False)])
-        display(voxel_height[i])
         prob_th[i] = HBox([Label('Probability threshold:', layout=label_layout), widgets.FloatText(
             value=0.5, description='', disabled=False)])
         display(prob_th[i])
         
+        scale_factor[i] = HBox([Label('Rescaling:', layout=label_layout), widgets.FloatText(
+            value=1., description='', disabled=False)])
+        #display(scale_factor[i])
+        
     parameters.append(input_dir)
     parameters.append(input_classifier)
     parameters.append(output_dir)
-    parameters.append(voxel_width)
-    parameters.append(voxel_height)
     parameters.append(prob_th)
-        
+    parameters.append(scale_factor)
+            
     return parameters 
-
-def saving_model_for_Fiji_plugin_interface(nb_trainings):
-    input_classifier = np.zeros([nb_trainings], FileChooser)
-    
-    parameters = []
-    for i in range(nb_trainings):
-        print('\x1b[1m'+"Input model")
-        input_classifier[i] = FileChooser('./models')
-        display(input_classifier[i])
-        
-    parameters.append(input_classifier)
-        
-    return parameters  
         
 """
 Training and processing calling functions 
@@ -299,21 +317,22 @@ def training_Stardist_2D(nb_trainings, parameters):
     
         
         if parameters[3][i].children[1].value==True:
-            if parameters[7][i].children[1].value==True:
-                model_name = "StarDist_2D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            if parameters[9][i].children[1].value==True:
+                model_name = "StarDist_2D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[7][i].children[1].value)+"_withDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
-                model_name = "StarDist_2D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withoutDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                model_name = "StarDist_2D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[7][i].children[1].value)+"_withoutDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         else:
-            if parameters[7][i].children[1].value==True:
-                model_name = "StarDist_2D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            if parameters[9][i].children[1].value==True:
+                model_name = "StarDist_2D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[7][i].children[1].value)+"_withDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
-                model_name = "StarDist_2D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withoutDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                model_name = "StarDist_2D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[7][i].children[1].value)+"_withoutDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         train_model_sample_Stardist_2D(parameters[0][i].selected, parameters[1][i].selected, model_name,
                                        parameters[3][i].children[1].value, parameters[4][i].children[1].value,
-                                       parameters[8][i].children[1].value, parameters[6][i].children[1].value,
-                                       parameters[2][i].selected, parameters[5][i].children[1].value,
-                                       parameters[7][i].children[1].value, parameters[9][i].children[1].value)
+                                       parameters[5][i].children[1].value, parameters[6][i].children[1].value,
+                                       parameters[10][i].children[1].value, parameters[8][i].children[1].value,
+                                       parameters[2][i].selected, parameters[7][i].children[1].value,
+                                       parameters[9][i].children[1].value, parameters[11][i].children[1].value)
 
 def training_Stardist_3D(nb_trainings, parameters):
     for i in range(nb_trainings):
@@ -324,22 +343,23 @@ def training_Stardist_3D(nb_trainings, parameters):
     
         
         if parameters[3][i].children[1].value==True:
-            if parameters[7][i].children[1].value==True:
-                model_name = "StarDist_3D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            if parameters[11][i].children[1].value==True:
+                model_name = "StarDist_3D_withTL_"+str(parameters[4][i].children[1].value)+"ch_anisotropy_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withDA_"+str(parameters[10][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
-                model_name = "StarDist_3D_withTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withoutDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                model_name = "StarDist_3D_withTL_"+str(parameters[4][i].children[1].value)+"ch_anisotropy_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withoutDA_"+str(parameters[10][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         else:
-            if parameters[7][i].children[1].value==True:
-                model_name = "StarDist_3D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            if parameters[11][i].children[1].value==True:
+                model_name = "StarDist_3D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_anisotropy_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withDA_"+str(parameters[10][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
-                model_name = "StarDist_3D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_lr_"+str(parameters[5][i].children[1].value)+"_withoutDA_"+str(parameters[6][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                model_name = "StarDist_3D_withoutTL_"+str(parameters[4][i].children[1].value)+"ch_anisotropy_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withoutDA_"+str(parameters[10][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         train_model_sample_Stardist_3D(parameters[0][i].selected, parameters[1][i].selected, model_name,
                                        parameters[3][i].children[1].value, parameters[4][i].children[1].value,
-                                       parameters[8][i].children[1].value, parameters[6][i].children[1].value,
-                                       parameters[2][i].selected, parameters[5][i].children[1].value,
-                                       parameters[7][i].children[1].value, parameters[9][i].children[1].value)
-
+                                       parameters[5][i].children[1].value, parameters[6][i].children[1].value,
+                                       parameters[7][i].children[1].value, parameters[12][i].children[1].value, 
+                                       parameters[10][i].children[1].value, parameters[8][i].children[1].value, 
+                                       parameters[2][i].selected, parameters[9][i].children[1].value, 
+                                       parameters[11][i].children[1].value, parameters[13][i].children[1].value)
             
 def running_stardist_2D(nb_runnings, parameters):
     for i in range(nb_runnings):
@@ -372,18 +392,7 @@ def running_stardist_3D(nb_runnings, parameters):
         with open(os.path.join(model_path, 'config.json')) as jsondata:
             data = json.load(jsondata)
         n_channels = data["n_channel_in"]
-        run_stardist_models_on_directory_3D(parameters[0][i].selected, parameters[2][i].selected, n_channels, model, parameters[3][i].children[1].value, parameters[4][i].children[1].value, parameters[5][i].children[1].value)
-        del model
-        
-def saving_model_for_Fiji_plugin(nb_runnings, parameters):
-    for i in range(nb_runnings):
-        if parameters[0][i].selected==None:
-            sys.exit("Running #"+str(i+1)+": You need to select a trained model to run your images")
-
-        model_path = parameters[0][i].selected
-        model = StarDist2D(None, name = os.path.split(os.path.dirname(model_path))[-1], basedir = os.path.abspath(os.path.join(model_path,os.pardir)))
-        model.export_TF()
-        
+        run_stardist_models_on_directory_3D(parameters[0][i].selected, parameters[2][i].selected, n_channels, model, parameters[3][i].children[1].value, parameters[4][i].children[1].value)
         del model
         
 """
@@ -790,9 +799,10 @@ Training convnets
 """
     
 def train_model_sample_Stardist_2D(dataset_training = None,  dataset_validation = None,
-                                model_name = "model", pretrained = True, n_channels = 1, batch_size = 5, n_epoch = 100, 
-                                output_dir = "./models/", learning_rate = 1e-3, 
-                                data_augmentation = True, train_to_val_ratio = 0.2):
+                                   model_name = "model", pretrained = True, n_channels = 1, 
+                                   imaging_size_x = 256, imaging_size_y = 256, batch_size = 5, n_epoch = 100, 
+                                   output_dir = "./models/", learning_rate = 1e-3, 
+                                   data_augmentation = True, train_to_val_ratio = 0.2):
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
@@ -840,7 +850,7 @@ def train_model_sample_Stardist_2D(dataset_training = None,  dataset_validation 
             # Should be chosen based on (largest) object sizes
             train_completion_crop  = 32,
             # Size of patches to be cropped from provided training images
-            train_patch_size       = (256,256),
+            train_patch_size       = (imaging_size_y,imaging_size_x),
             # Regularizer to encourage distance predictions on background regions to be 0
             train_background_reg   = 1e-4,
             # Fraction (0..1) of patches that will only be sampled from regions that contain foreground pixels
@@ -881,9 +891,11 @@ def train_model_sample_Stardist_2D(dataset_training = None,  dataset_validation 
     del model
 
 def train_model_sample_Stardist_3D(dataset_training = None,  dataset_validation = None,
-                                model_name = "model", pretrained = True, n_channels = 1, batch_size = 5, n_epoch = 100, 
-                                output_dir = "./models/", learning_rate = 1e-3, 
-                                data_augmentation = True, train_to_val_ratio = 0.2):
+                                   model_name = "model", pretrained = True, n_channels = 1, 
+                                   imaging_size_x = 128, imaging_size_y = 128, imaging_size_z = 32, 
+                                   batch_size = 5, n_epoch = 100, 
+                                   anisotropy_ratio_z_over_xy = 2.0, output_dir = "./models/", 
+                                   learning_rate = 1e-3, data_augmentation = True, train_to_val_ratio = 0.2):
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
     if gpus:
@@ -906,7 +918,7 @@ def train_model_sample_Stardist_3D(dataset_training = None,  dataset_validation 
     print(len(X_train), 'training images')
     print(len(X_test), 'validation images')
 
-    anisotropy = (1.0, 1.0, 1.0)
+    anisotropy = (anisotropy_ratio_z_over_xy, 1.0, 1.0)
     
     # 96 is a good default choice (see 1_data.ipynb)
     n_rays = 96
@@ -924,7 +936,7 @@ def train_model_sample_Stardist_3D(dataset_training = None,  dataset_validation 
         anisotropy       = anisotropy,
         n_channel_in     = n_channels,
         # adjust for your data below (make patch size as large as possible)
-        train_patch_size = (48,96,96),
+        train_patch_size = (imaging_size_z, imaging_size_y, imaging_size_x),
         train_batch_size = 2,
         train_epochs     = n_epoch,
         train_steps_per_epoch  = len(X_train)/batch_size,
@@ -948,137 +960,6 @@ def train_model_sample_Stardist_3D(dataset_training = None,  dataset_validation 
     #    print('Failed to optimize thresholds')
     del model
     
-def train_model_sample_Stardist_tissueNet(X_train, Y_train, X_test, Y_test, model_name = "model", n_channels = 1, 
-                                          batch_size = 5, n_epoch = 100, output_dir = "./models/", 
-                                          learning_rate = 1e-3, data_augmentation = True):
-
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            print(e)
-    
-    if (X_train is None) or (Y_train is None) or (X_test is None) or (Y_test is None):
-        sys.exit("The input training dataset needs to be defined")
-
-    train_dict = {"channels": X_train, "labels": Y_train}
-
-    # data information (one way for the user to check if the training dataset makes sense)
-    print(len(train_dict["channels"]), 'training images')
-    print(len(X_test), 'validation images')
-    
-    conf = Config2D (
-            # number of channels in input images
-            n_channel_in           = n_channels,
-            # 32 is a good default choice (see 1_data.ipynb)
-            n_rays                 = 32,
-            # Predict on subsampled grid for increased efficiency and larger field of view
-            grid                   = (2,2),
-            use_gpu                = False,
-            # Number of U-Net resolution levels (down/up-sampling layers)
-            unet_n_depth           = 3,#6,#3,
-            # Convolution kernel size for all (U-Net) convolution layers
-            unet_kernel_size       = (3,3),
-            # Number of convolution kernels (feature channels) for first U-Net layer
-            # Doubled after each down-sampling layer
-            unet_n_filter_base     = 64,
-            # Maxpooling size for all (U-Net) convolution layers
-            unet_pool              = (2,2),
-            # Number of filters of the extra convolution layer after U-Net (0 to disable)
-            net_conv_after_unet    = 128,
-            # Train model to predict complete shapes for partially visible objects at image boundary
-            train_shape_completion = False,
-            # If 'train_shape_completion' is set to True, specify number of pixels to crop at boundary of training patches
-            # Should be chosen based on (largest) object sizes
-            train_completion_crop  = 32,
-            # Size of patches to be cropped from provided training images
-            train_patch_size       = (256,256),
-            # Regularizer to encourage distance predictions on background regions to be 0
-            train_background_reg   = 1e-4,
-            # Fraction (0..1) of patches that will only be sampled from regions that contain foreground pixels
-            train_foreground_only  = 0.9,
-            # Training loss for star-convex polygon distances ('mse' or 'mae')
-            train_dist_loss        = 'mae',
-            # Weights for losses relating to (probability, distance)
-            train_loss_weights     = (1,0.2),
-            # Number of training epochs
-            train_epochs           = n_epoch,
-            # Number of parameter update steps per epoch
-            train_steps_per_epoch  = len(train_dict["channels"])/batch_size,
-            # Learning rate for training
-            train_learning_rate    = learning_rate,
-            # Batch size for training
-            train_batch_size       = batch_size,
-            # Number of patches to be extracted from validation images (``None`` = one patch per image)
-            train_n_val_patches    = None,
-            # Enable TensorBoard for monitoring training progress
-            train_tensorboard      = True,
-        
-        )
-
-    model = StarDist2D(conf, name=model_name, basedir=output_dir)
-    if data_augmentation==True:
-        augment = original_augmenter
-    else:
-        augment = None
-    model.train(train_dict["channels"], train_dict["labels"], validation_data=(X_test,Y_test), augmenter = augment)
-    try:
-        model.optimize_thresholds(X_test, Y_test)
-    except Exception as e:
-        print('Failed to optimize thresholds')
-    del model
-
-    
-def transfer_learning_model_sample_Stardist_tissueNet(X_train, Y_train, X_test, Y_test, model_path = "", 
-                                                      n_channels = 1, batch_size = 5, n_epoch = 100, 
-                                                      learning_rate = 1e-3, data_augmentation = True):
-
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    if gpus:
-        try:
-            # Currently, memory growth needs to be the same across GPUs
-            for gpu in gpus:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-        except RuntimeError as e:
-            # Memory growth must be set before GPUs have been initialized
-            print(e)
-    
-    if (X_train is None) or (Y_train is None) or (X_test is None) or (Y_test is None):
-        sys.exit("The input training dataset needs to be defined")
-
-        nimp
-        
-    train_dict = {"channels": X_train, "labels": Y_train}
-
-    # data information (one way for the user to check if the training dataset makes sense)
-    print(len(train_dict["channels"]), 'training images')
-    print(len(X_test), 'validation images')
-
-    model = StarDist2D(None, name = os.path.split(os.path.dirname(model_path))[-1], 
-                       basedir = os.path.abspath(os.path.join(model_path,os.pardir)))
-    with open(os.path.join(model_path, 'config.json')) as jsondata:
-        data = json.load(jsondata)
-    
-    if data_augmentation==True:
-        augment = original_augmenter
-    else:
-        augment = None
-    model.train(train_dict["channels"], train_dict["labels"], validation_data=(X_test,Y_test), augmenter = augment)
-    try:
-        model.optimize_thresholds(X_test, Y_test)
-    except Exception as e:
-        print('Failed to optimize thresholds')
-    del model
-            
-
 """
 Executing convnets
 """
@@ -1186,7 +1067,7 @@ def xyz_resize(im, nz, ny, nx):
                 resized_image[z, y, x] = im[int(z*im.shape[0]/nz), int(y*im.shape[1]/ny), int(x*im.shape[2]/nx)]
     return resized_image
 
-def run_stardist_models_on_directory_3D(data_location, output_location, n_channels, model, voxel_width, voxel_depth, prob_thresh=0.5, scale_factor=1, nms_thresh=0.2):
+def run_stardist_models_on_directory_3D(data_location, output_location, n_channels, model, prob_thresh=0.5, scale_factor=1, nms_thresh=0.2):
 
     # create output folder if it doesn't exist
     os.makedirs(name=output_location, exist_ok=True)
@@ -1208,9 +1089,13 @@ def run_stardist_models_on_directory_3D(data_location, output_location, n_channe
     for i in range(len(normalized_images)):
         print("Processing image ",str(counter + 1)," of ",str(len(normalized_images)))
         if scale_factor>1.01 or scale_factor<0.99:
-            resized_normalized_image = rescale(normalized_images[i], [scale_factor*voxel_depth/voxel_width, scale_factor, scale_factor])
+            resized_normalized_image = rescale(normalized_images[i], [scale_factor, scale_factor, scale_factor])
         else:
-            resized_normalized_image = rescale(normalized_images[i], [voxel_depth/voxel_width, 1, 1])
+            resized_normalized_image = normalized_images[i]
+        #if scale_factor>1.01 or scale_factor<0.99:
+        #    resized_normalized_image = rescale(normalized_images[i], [scale_factor*voxel_depth/voxel_width, scale_factor, scale_factor])
+        #else:
+        #    resized_normalized_image = rescale(normalized_images[i], [voxel_depth/voxel_width, 1, 1])
         
         processed_image, details = model.predict_instances(resized_normalized_image, 
                                                            n_tiles=model._guess_n_tiles(resized_normalized_image), 
@@ -1219,10 +1104,12 @@ def run_stardist_models_on_directory_3D(data_location, output_location, n_channe
 
         # Save images
         cnnout_name = os.path.join(output_location, os.path.splitext(os.path.basename(images_names[counter]))[0] + ".tiff")
-        #tiff.imsave(cnnout_name, np.resize(processed_image, (normalized_images[i].shape[0], normalized_images[i].shape[1], normalized_images[i].shape[2])).astype('uint16'))
         if scale_factor>1.01 or scale_factor<0.99:
             tiff.imsave(cnnout_name, xyz_resize(processed_image, normalized_images[i].shape[0], normalized_images[i].shape[1], normalized_images[i].shape[2]).astype('uint16'))
         else:
-            tiff.imsave(cnnout_name, z_resize(processed_image, normalized_images[i].shape[0]).astype('uint16'))
+            tiff.imsave(cnnout_name, processed_image.astype('uint16'))
+        #    tiff.imsave(cnnout_name, xyz_resize(processed_image, normalized_images[i].shape[0], normalized_images[i].shape[1], normalized_images[i].shape[2]).astype('uint16'))
+        #else:
+        #    tiff.imsave(cnnout_name, z_resize(processed_image, normalized_images[i].shape[0]).astype('uint16'))
 
         counter += 1
