@@ -69,7 +69,7 @@ def training_parameters_interface(nb_trainings):
     imaging_field_y = np.zeros([nb_trainings], HBox)
     learning_rate = np.zeros([nb_trainings], HBox)
     nb_epochs = np.zeros([nb_trainings], HBox)
-    nb_augmentations = np.zeros([nb_trainings], HBox)
+    data_augmentation = np.zeros([nb_trainings], HBox)
     batch_size = np.zeros([nb_trainings], HBox)
     train_to_val_ratio = np.zeros([nb_trainings], HBox)
     
@@ -119,9 +119,9 @@ def training_parameters_interface(nb_trainings):
             value=100, description='', disabled=False)])
         display(nb_epochs[i])
 
-        nb_augmentations[i] = HBox([Label('Number of augmentations:', layout=label_layout), widgets.IntText(
-            value=0, description='', disabled=False)])
-        display(nb_augmentations[i])
+        data_augmentation[i] = HBox([Label('Data augmentation:', layout=label_layout), widgets.Checkbox(
+            value=False, description='', disabled=False)])
+        display(data_augmentation[i])
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
             value=1, description='', disabled=False)])
@@ -143,7 +143,7 @@ def training_parameters_interface(nb_trainings):
     parameters.append(imaging_field_y)
     parameters.append(learning_rate)
     parameters.append(nb_epochs)
-    parameters.append(nb_augmentations)
+    parameters.append(data_augmentation)
     parameters.append(batch_size)
     parameters.append(train_to_val_ratio)
     
@@ -229,10 +229,12 @@ def training(nb_trainings, parameters):
     
 
         model = unet(parameters[6][i].children[1].value, parameters[8][i].children[1].value, parameters[7][i].children[1].value, parameters[5][i].children[1].value, parameters[3][i].children[1].value, int(parameters[4][i].children[1].value))
-        model_name = "UNet_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_FL_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        model_name = "UNet_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_FL_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_"+str(parameters[11][i].children[1].value)+"DA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
+        if parameters[11][i].children[1].value==True:
+            model_name = "UNet_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_FL_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withDA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        else:
+            model_name = "UNet_depth_"+str(parameters[3][i].children[1].value)+"_"+str(parameters[4][i].children[1].value)+"neurons_FL_"+str(parameters[5][i].children[1].value)+"ch_"+str(parameters[6][i].children[1].value)+"cl_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[8][i].children[1].value)+"_lr_"+str(parameters[9][i].children[1].value)+"_withoutDA_"+str(parameters[10][i].children[1].value)+"ep"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+               
         train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[12][i].children[1].value, parameters[10][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[8][i].children[1].value, parameters[7][i].children[1].value, parameters[2][i].selected, parameters[9][i].children[1].value, parameters[11][i].children[1].value, parameters[13][i].children[1].value)
         del model
         
@@ -318,7 +320,7 @@ def get_image(file_name):
 """
 Data generator for training_data
 """
-def get_data_sample(training_directory, validation_directory, nb_channels = 1, nb_classes = 3, imaging_field_x = 256, imaging_field_y = 256, nb_augmentations = 1, validation_training_ratio = 0.1):
+def get_data_sample(training_directory, validation_directory, nb_channels = 1, nb_classes = 3, imaging_field_x = 256, imaging_field_y = 256, validation_training_ratio = 0.1):
 
     channels_training = []
     labels_training = []
@@ -692,13 +694,12 @@ def GenerateRandomImgaugAugmentation(
     return iaa.Sequential(augmentationMapOutput)
 
 
-def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2, nb_augmentations):
+def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2):
 
     cpt = 0
     n_images = len(x_init)
     arr = np.arange(n_images)
     np.random.shuffle(arr)
-    non_augmented_array = np.zeros(n_images)
 
     while(True):
 
@@ -711,9 +712,19 @@ def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_chann
             # get random image
             img_index = arr[cpt%n_images]
 
+            # get random crop
+            if dim1==x_init[img_index].shape[0]:
+                start_dim1 = 0
+            else:
+                start_dim1 = np.random.randint(low=0, high=x_init[img_index].shape[0] - dim1)
+            if dim2==x_init[img_index].shape[1]:
+                start_dim2 = 0
+            else:
+                start_dim2 = np.random.randint(low=0, high=x_init[img_index].shape[1] - dim2)
+                
             # open images
-            x_big = x_init[img_index]
-            y_big = y_init[img_index]
+            x_big = x_init[img_index][start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
+            y_big = y_init[img_index][start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
 
             # augmentation
             segmap = SegmentationMapsOnImage(y_big, shape=x_big.shape)
@@ -722,35 +733,9 @@ def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_chann
             x_aug, segmap = augmentationMap(image=x_big, segmentation_maps=segmap)
             y_aug = segmap.get_arr()
             
-            # image normalization
-            x_norm = x_aug
-
-            # get random crop
-            if dim1==x_big.shape[0]:
-                start_dim1 = 0
-            else:
-                start_dim1 = np.random.randint(low=0, high=x_big.shape[0] - dim1)
-            if dim2==x_big.shape[1]:
-                start_dim2 = 0
-            else:
-                start_dim2 = np.random.randint(low=0, high=x_big.shape[1] - dim2)
-
-            # non augmented image
-            if non_augmented_array[cpt%n_images]==0:
-                if random.Random().random() < (2./nb_augmentations):
-                    non_augmented_array[cpt%n_images] = 1
-                    x_aug = x_big
-                    y_aug = y_big
-                    
-            patch_x = x_aug[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
-            patch_y = y_aug[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
-            
-            patch_x = patch_x
-            patch_y = patch_y
-
             # save image to buffer
-            x[k, :, :, :] = patch_x
-            y[k, :, :, :] = patch_y
+            x[k, :, :, :] = x_aug
+            y[k, :, :, :] = y_aug
 
 
             cpt += 1
@@ -778,7 +763,7 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
                        n_channels = 1, n_classes = 3,
                        imaging_field_x = 256, imaging_field_y = 256,
                        output_dir = "./models/", learning_rate = 1e-3, 
-                       nb_augmentations = 0, train_to_val_ratio = 0.2):
+                       data_augmentation = True, train_to_val_ratio = 0.2):
 
     if dataset_training is None:
         sys.exit("The input training dataset needs to be defined")
@@ -795,10 +780,10 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     input_shape = model.layers[0].output_shape
     output_shape = model.layers[-1].output_shape
 
-    train_dict, (X_test, Y_test) = get_data_sample(dataset_training, dataset_validation, nb_channels = n_channels, nb_classes = n_classes, imaging_field_x = imaging_field_x, imaging_field_y = imaging_field_y, nb_augmentations = nb_augmentations, validation_training_ratio = train_to_val_ratio)
+    train_dict, (X_test, Y_test) = get_data_sample(dataset_training, dataset_validation, nb_channels = n_channels, nb_classes = n_classes, imaging_field_x = imaging_field_x, imaging_field_y = imaging_field_y, validation_training_ratio = train_to_val_ratio)
 
     # data information (one way for the user to check if the training dataset makes sense)
-    print((nb_augmentations+1)*len(train_dict["channels"]), 'training images')
+    print(len(train_dict["channels"]), 'training images')
     print(len(X_test), 'validation images')
 
     # determine the weights for the weighted cross-entropy based on class distribution for training dataset
@@ -820,16 +805,16 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     model.compile(loss = weighted_crossentropy(class_weights = class_weights), optimizer = optimizer, metrics=['accuracy'])
 
     # prepare the generation of data
-    if nb_augmentations == 0:
+    if data_augmentation == False:
         train_generator = random_sample_generator(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x) 
     else:
-        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x, nb_augmentations) 
+        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x) 
         
     validation_generator = random_sample_generator(X_test, Y_test, batch_size, n_channels, n_classes, imaging_field_y, imaging_field_x) 
     # fit the model
     lr_sched = rate_scheduler(lr = learning_rate, decay = 0.95)
     loss_history = model.fit(train_generator,
-                                       steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
+                                       steps_per_epoch = int(len(train_dict["labels"])/batch_size), 
                                        epochs=n_epoch, validation_data=validation_generator, validation_steps=len(X_test),
                                        callbacks = [ModelCheckpoint(file_name_save, monitor = 'val_loss', verbose = 0, save_best_only = True, mode = 'auto',save_weights_only = True), reduce_lr_on_plateau_callback, tensorboard_callback])
     
