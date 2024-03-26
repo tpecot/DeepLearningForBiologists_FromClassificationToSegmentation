@@ -510,7 +510,10 @@ def training_mnist(nb_trainings, parameters):
     
         model = mnist(parameters[4][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value)
         
-        model_name = "Mnist_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[7][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"DA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        if parameters[9][i].children[1].value==True:
+            model_name = "Mnist_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[7][i].children[1].value)+"_withDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        else:
+            model_name = "Mnist_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[7][i].children[1].value)+"_withoutDA_"+str(parameters[8][i].children[1].value)+"ep_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         train_model_sample(model, parameters[0][i].selected, parameters[1][i].selected, model_name,parameters[10][i].children[1].value, parameters[8][i].children[1].value, parameters[5][i].children[1].value, parameters[6][i].children[1].value, parameters[3][i].children[1].value, parameters[2][i].selected, parameters[7][i].children[1].value, parameters[9][i].children[1].value, parameters[11][i].children[1].value)
         del model
