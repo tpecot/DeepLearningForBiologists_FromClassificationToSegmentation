@@ -110,7 +110,7 @@ def training_parameters_interface(nb_trainings):
         display(data_augmentation[i])
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
-            value=1, description='', disabled=False)])
+            value=8, description='', disabled=False)])
         display(batch_size[i])
 
         train_to_val_ratio[i] = HBox([Label('Ratio of training in validation:', layout=label_layout), widgets.BoundedFloatText(
@@ -230,7 +230,7 @@ def training_parameters_TL_interface(nb_trainings):
 
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
-            value=1, description='', disabled=False)])
+            value=8, description='', disabled=False)])
         display(batch_size[i])
 
         train_to_val_ratio[i] = HBox([Label('Ratio of training in validation:', layout=label_layout), widgets.BoundedFloatText(
