@@ -34,7 +34,7 @@ import random
 
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, ReduceLROnPlateau
-from tensorflow.keras.optimizers import SGD, RMSprop
+from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Model
@@ -63,7 +63,7 @@ def training_parameters_interface(nb_trainings):
     imaging_field_y = np.zeros([nb_trainings], HBox)
     learning_rate = np.zeros([nb_trainings], HBox)
     nb_epochs = np.zeros([nb_trainings], HBox)
-    nb_augmentations = np.zeros([nb_trainings], HBox)
+    data_augmentation = np.zeros([nb_trainings], HBox)
     batch_size = np.zeros([nb_trainings], HBox)
     train_to_val_ratio = np.zeros([nb_trainings], HBox)
     
@@ -105,9 +105,9 @@ def training_parameters_interface(nb_trainings):
             value=100, description='', disabled=False)])
         display(nb_epochs[i])
 
-        nb_augmentations[i] = HBox([Label('Number of augmentations:', layout=label_layout), widgets.IntText(
-            value=0, description='', disabled=False)])
-        display(nb_augmentations[i])
+        data_augmentation[i] = HBox([Label('Data augmentation:', layout=label_layout), widgets.Checkbox(
+            value=False, description='', disabled=False)])
+        display(data_augmentation[i])
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
             value=1, description='', disabled=False)])
@@ -127,7 +127,7 @@ def training_parameters_interface(nb_trainings):
     parameters.append(imaging_field_y)
     parameters.append(learning_rate)
     parameters.append(nb_epochs)
-    parameters.append(nb_augmentations)
+    parameters.append(data_augmentation)
     parameters.append(batch_size)
     parameters.append(train_to_val_ratio)
     
@@ -151,7 +151,7 @@ def training_parameters_TL_interface(nb_trainings):
     all_network_training = np.zeros([nb_trainings], HBox)
     nb_epochs_all = np.zeros([nb_trainings], HBox)
     learning_rate_all = np.zeros([nb_trainings], HBox)
-    nb_augmentations = np.zeros([nb_trainings], HBox)
+    data_augmentation = np.zeros([nb_trainings], HBox)
     batch_size = np.zeros([nb_trainings], HBox)
     train_to_val_ratio = np.zeros([nb_trainings], HBox)
     
@@ -224,9 +224,10 @@ def training_parameters_TL_interface(nb_trainings):
             value=0.0001, description='', disabled=False)])
         display(learning_rate_all[i])
 
-        nb_augmentations[i] = HBox([Label('Number of augmentations:', layout=label_layout), widgets.IntText(
-            value=0, description='', disabled=False)])
-        display(nb_augmentations[i])
+        data_augmentation[i] = HBox([Label('Data augmentation:', layout=label_layout), widgets.Checkbox(
+            value=False, description='', disabled=False)])
+        display(data_augmentation[i])
+
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
             value=1, description='', disabled=False)])
@@ -254,7 +255,7 @@ def training_parameters_TL_interface(nb_trainings):
     parameters.append(all_network_training)
     parameters.append(nb_epochs_all)
     parameters.append(learning_rate_all)
-    parameters.append(nb_augmentations)
+    parameters.append(data_augmentation)
     parameters.append(batch_size)
     parameters.append(train_to_val_ratio)
     
@@ -284,7 +285,7 @@ def running_parameters_interface(nb_trainings):
 
         label_layout = Layout(width='150px',height='30px')
 
-        output_mode[i] = HBox([Label('Score:', layout=label_layout), widgets.Checkbox(
+        output_mode[i] = HBox([Label('Score image:', layout=label_layout), widgets.Checkbox(
             value=False, description='',disabled=False)])
         display(output_mode[i])
         
@@ -346,27 +347,49 @@ def training_MobileNetV2(nb_trainings, parameters):
 
             # this is the model we will train
             model = Model(inputs=base_model.input, outputs=predictions)
+            
 
             if parameters[8][i].children[1].value:
                 if parameters[11][i].children[1].value:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                 else:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
                 if parameters[11][i].children[1].value:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                 else:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_TL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
                         sys.exit("Training #"+str(i+1)+": You need to select a part of the network to train")
                         
@@ -411,23 +434,44 @@ def training_MobileNetV2(nb_trainings, parameters):
             if parameters[8][i].children[1].value:
                 if parameters[11][i].children[1].value:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                 else:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[10][i].children[1].value)+"_"+str(parameters[9][i].children[1].value)+"ep_last_layer_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
             else:
                 if parameters[11][i].children[1].value:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[13][i].children[1].value)+"_"+str(parameters[12][i].children[1].value)+"ep_last_block_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                 else:
                     if parameters[14][i].children[1].value:
-                        model_name = "MobileNetV2_withoutTL_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_"+str(parameters[17][i].children[1].value)+"DA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        if parameters[17][i].children[1].value==True:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+                        else:
+                            model_name = "MNet_"+str(parameters[3][i].children[1].value)+"ch_"+str(parameters[4][i].children[1].value)+"cl_"+str(parameters[5][i].children[1].value)+"_"+str(parameters[6][i].children[1].value)+"_lr_"+str(parameters[16][i].children[1].value)+"_"+str(parameters[15][i].children[1].value)+"ep_whole_network_withoutDA_"+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
                     else:
                         sys.exit("Training #"+str(i+1)+": You need to select a part of the network to train")
             
@@ -525,16 +569,6 @@ def search_label_for_image_in_file(file_name, image_to_search, nb_classes):
                     labels[0] = 1
                 else:
                     labels[int(line[1])] = 1
-                #label_sum = 0
-                #for i in range(1, nb_classes):
-                #    labels[i-1] = int(line[i])
-                #    label_sum += int(line[i])
-                #if label_sum==0:
-                #    labels[nb_classes-1] = 1
-    #if found_image==False:
-    #    print("Didn't find it")
-    #    labels[nb_classes-1] = 1
-    #found_image = True
     return found_image, labels
 
 def rate_scheduler(lr = .001, decay = 0.95):
@@ -606,7 +640,7 @@ def get_image(file_name):
 Data generator for training_data
 """
 
-def get_data_sample(training_directory, validation_directory, nb_channels = 1, nb_classes = 3, imaging_field_x = 256, imaging_field_y = 256, nb_augmentations = 1, validation_training_ratio = 0.1):
+def get_data_sample(training_directory, validation_directory, nb_channels = 1, nb_classes = 3, imaging_field_x = 256, imaging_field_y = 256, validation_training_ratio = 0.1):
 
     channels_training = []
     labels_training = []
@@ -746,12 +780,6 @@ def get_data_sample(training_directory, validation_directory, nb_channels = 1, n
                 
     if len(final_channels_training) < 1:
         sys.exit("Empty train image list")
-
-    #just to be non-empty
-    #if len(channels_validation) < 1:
-    #    channels_validation += channels_training[len(channels_training)-1]
-    #    labels_validation += channels_validation[len(channels_validation)-1]
-    
 
     X_test = channels_validation
     Y_test =[]
@@ -938,13 +966,12 @@ def GenerateRandomImgaugAugmentation(
         
     return iaa.Sequential(augmentationMapOutput)
 
-def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2, nb_augmentations):
+def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_channels, n_classes, dim1, dim2):
 
     cpt = 0
     n_images = len(x_init)
     arr = np.arange(n_images)
     np.random.shuffle(arr)
-    non_augmented_array = np.zeros(n_images)
 
     while(True):
 
@@ -957,35 +984,25 @@ def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_chann
             # get random image
             img_index = arr[cpt%n_images]
 
+            # get random crop
+            if dim1==x_init[img_index].shape[0]:
+                start_dim1 = 0
+            else:
+                start_dim1 = np.random.randint(low=0, high=x_init[img_index].shape[0] - dim1)
+            if dim2==x_init[img_index].shape[1]:
+                start_dim2 = 0
+            else:
+                start_dim2 = np.random.randint(low=0, high=x_init[img_index].shape[1] - dim2)
+
             # open images
-            x_big = x_init[img_index]
+            x_big = x_init[img_index][start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
 
             # augmentation
             augmentationMap = GenerateRandomImgaugAugmentation()
 
             x_aug = augmentationMap(image=x_big.astype('float32'))
             
-            # image normalization
-            x_norm = x_aug.astype('float32')
-
-            # get random crop
-            if dim1==x_big.shape[0]:
-                start_dim1 = 0
-            else:
-                start_dim1 = np.random.randint(low=0, high=x_big.shape[0] - dim1)
-            if dim2==x_big.shape[1]:
-                start_dim2 = 0
-            else:
-                start_dim2 = np.random.randint(low=0, high=x_big.shape[1] - dim2)
-
-            # non augmented image
-            if non_augmented_array[cpt%n_images]==0:
-                if random.Random().random() < (2./nb_augmentations):
-                    non_augmented_array[cpt%n_images] = 1
-                    x_aug = x_big
-                    
-            patch_x = x_aug[start_dim1:start_dim1 + dim1, start_dim2:start_dim2 + dim2, :]
-            patch_x = np.asarray(patch_x)
+            patch_x = np.asarray(x_aug)
 
             # define label associated with image
             current_classes = np.asarray(y_init[img_index]).astype('float32')
@@ -993,7 +1010,6 @@ def random_sample_generator_dataAugmentation(x_init, y_init, batch_size, n_chann
             # save image to buffer
             x[k, :, :, :] = patch_x
             y[k, :] = current_classes
-
 
             cpt += 1
         
@@ -1020,7 +1036,7 @@ def weighted_crossentropy(class_weights):
 def train_model_sample(model = None, dataset_training = None,  dataset_validation = None,
                        model_name = "model", batch_size = 5, n_epoch = 100, 
                        imaging_field_x = 256, imaging_field_y = 256, n_channels = 1,
-                       output_dir = "./trained_models/", learning_rate = 1e-3, nb_augmentations = 0,
+                       output_dir = "./trained_models/", learning_rate = 1e-3, data_augmentation = True,
                        train_to_val_ratio = 0.2):
 
     if dataset_training is None:
@@ -1041,30 +1057,26 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     output_shape = model.layers[-1].output_shape
     n_classes = output_shape[-1]
 
-    train_dict, (X_test, Y_test) = get_data_sample(dataset_training, dataset_validation, nb_channels = n_channels, nb_classes = n_classes, imaging_field_x = imaging_field_x, imaging_field_y = imaging_field_y, nb_augmentations = nb_augmentations, validation_training_ratio = train_to_val_ratio)
+    train_dict, (X_test, Y_test) = get_data_sample(dataset_training, dataset_validation, nb_channels = n_channels, nb_classes = n_classes, imaging_field_x = imaging_field_x, imaging_field_y = imaging_field_y, validation_training_ratio = train_to_val_ratio)
 
     # data information (one way for the user to check if the training dataset makes sense)
-    print((nb_augmentations+1)*len(train_dict["channels"]), 'training images')
+    print(len(train_dict["channels"]), 'training images')
     print(len(X_test), 'validation images')
 
-    # convert class vectors to binary class matrices
-    #train_dict["labels"] = np_utils.to_categorical(train_dict["labels"], n_classes)
-    #Y_test = np_utils.to_categorical(Y_test, n_classes).astype('float32')
-
     # prepare the model compilation
-    optimizer = SGD(learning_rate = learning_rate, decay = 1e-07, momentum = 0.9, nesterov = True)
+    optimizer = RMSprop(learning_rate = learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     
     # prepare the generation of data
-    if nb_augmentations == 0:
+    if data_augmentation == False:
         train_generator = random_sample_generator(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y) 
     else:
-        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y, nb_augmentations) 
+        train_generator = random_sample_generator_dataAugmentation(train_dict["channels"], train_dict["labels"], batch_size, n_channels, n_classes, imaging_field_x, imaging_field_y) 
         
     # fit the model
     lr_sched = rate_scheduler(lr = learning_rate, decay = 0.95)
     loss_history = model.fit(train_generator,
-                                       steps_per_epoch = int((nb_augmentations+1)*len(train_dict["labels"])/batch_size), 
+                                       steps_per_epoch = int(len(train_dict["labels"])/batch_size), 
                                        epochs=n_epoch, validation_data=(X_test,Y_test), 
                                        callbacks = [ModelCheckpoint(file_name_save, monitor = 'val_loss', verbose = 0, save_best_only = True, mode = 'auto',save_weights_only = True), reduce_lr_on_plateau_callback, tensorboard_callback])
 
