@@ -34,7 +34,7 @@ import random
 
 from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, ReduceLROnPlateau
-from tensorflow.keras.optimizers import SGD, RMSprop
+from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import Model
@@ -1067,7 +1067,7 @@ def train_model_sample(model = None, dataset_training = None,  dataset_validatio
     print(len(X_test), 'validation images')
 
     # prepare the model compilation
-    optimizer = SGD(learning_rate = learning_rate, decay = 1e-07, momentum = 0.9, nesterov = True)
+    optimizer = RMSprop(learning_rate = learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
     
     # prepare the generation of data
