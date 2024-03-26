@@ -116,7 +116,7 @@ def training_parameters_stardist_interface_2D(nb_trainings):
         display(data_augmentation[i])
 
         batch_size[i] = HBox([Label('Batch size:', layout=label_layout), widgets.IntText(
-            value=1, description='', disabled=False)])
+            value=8, description='', disabled=False)])
         display(batch_size[i])
 
         train_to_val_ratio[i] = HBox([Label('Ratio of training in validation:', layout=label_layout), widgets.BoundedFloatText(
