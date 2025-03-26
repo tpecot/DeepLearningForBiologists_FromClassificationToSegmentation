@@ -15,10 +15,9 @@ double downsample = 1
 
 // Create an ImageServer where the pixels are derived from annotations
 def labelServer = new LabeledImageServer.Builder(imageData)
-    .backgroundLabel(0, ColorTools.BLACK) // Specify background label (usually 0 or 255)
     .downsample(downsample)    // Choose server resolution; this should match the resolution at which tiles are exported
-    .addLabel('Root', 1)      // Choose output labels (the order matters!)
-    .addLabel('Leaf', 2)      // Choose output labels (the order matters!)
+    .addLabel('Root', 0)      // Choose output labels (the order matters!)
+    .addLabel('Leaf', 1)      // Choose output labels (the order matters!)
     .multichannelOutput(true) // If true, each label refers to the channel of a multichannel binary image (required fo
     .build()
 
@@ -26,7 +25,6 @@ def labelServer = new LabeledImageServer.Builder(imageData)
 new TileExporter(imageData)
     .downsample(downsample)     // Define export resolution
     .imageExtension('.tiff')     // Define file extension for original pixels (often .tif, .jpg, '.png' or '.ome.tif')
-    .tileSize(1024)              // Define size of each tile, in pixels
     .labeledServer(labelServer) // Define the labeled image server to use (i.e. the one we just built)
     .annotatedTilesOnly(true)  // If true, only export tiles if there is a (labeled) annotation present
     .overlap(0)                // Define overlap, in pixel units at the export resolution
